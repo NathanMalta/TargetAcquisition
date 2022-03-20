@@ -120,7 +120,6 @@ class DQN():
         state = state.reshape(1, NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH) #dim [Dim: (N,C,H,W)]
         state = torch.from_numpy(state)
 
-        
         return state
 
 

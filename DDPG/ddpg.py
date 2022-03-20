@@ -9,7 +9,10 @@ import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 
-from .nets import Actor, Critic
+from Simulator.Constants import NUM_FRAMES_STACKED, IMG_WIDTH, IMG_HEIGHT
+import numpy as np
+
+from .netsCnnTest2 import Actor, Critic
 
 logger = logging.getLogger('ddpg')
 logger.setLevel(logging.INFO)
@@ -89,6 +92,7 @@ class DDPG(object):
                             Used to evaluate the action.
             action_noise:   If not None, the noise to apply on the evaluated action
         """
+        state = self.format_state(state)
         x = state.to(device)
 
         # Get the continous action value to perform in the env
@@ -106,6 +110,16 @@ class DDPG(object):
         mu = mu.clamp(-1, 1)
 
         return mu
+    
+    def format_state(self, state):
+        '''Converts a binary image to a properly formatted torch image vector
+        '''
+        # state = torch.unsqueeze(torch.FloatTensor(state), 0) # get a 1D array
+        state = np.ascontiguousarray(state, dtype=np.float32) / 255
+        state = state.reshape(1, NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH) #dim [Dim: (N,C,H,W)]
+        state = torch.from_numpy(state)
+
+        return state
 
     def update_params(self, batch):
         """

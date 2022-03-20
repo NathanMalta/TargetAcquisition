@@ -50,6 +50,7 @@ class Actor(nn.Module):
 
     def forward(self, inputs):
         x = inputs
+        x = torch.flatten(x, start_dim=1)
 
         # Layer 1
         x = self.linear1(x)
@@ -96,6 +97,7 @@ class Critic(nn.Module):
 
     def forward(self, inputs, actions):
         x = inputs
+        x = torch.flatten(x, start_dim=1)
 
         # Layer 1
         x = self.linear1(x)

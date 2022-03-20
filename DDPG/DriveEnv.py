@@ -73,10 +73,11 @@ class DriveEnv:
             #get image from camera at this position
             currentFrame = self.getFrame(xPos, yPos, theta)
             self.lastFrameStack.append(currentFrame)
-            currentFrameState = np.vstack((self.lastFrameStack))
-            currentFrameState = torch.tensor(currentFrameState.flatten(), dtype=torch.float)
+            currentFrameState = np.vstack([self.lastFrameStack])
+            currentFrameState = torch.tensor(currentFrameState, dtype=torch.float)
+            
             #convert this image into an action from the DQN
-            action = agent.calc_action(torch.tensor(currentFrameState.flatten(), dtype=torch.float), ou_noise)
+            action = agent.calc_action(currentFrameState, ou_noise)[0]
             #store state, frame, and action in controllerRecords
             self.controllerRecords.append([y, currentFrameState, action])
 
