@@ -31,12 +31,6 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # Parse given arguments
 # gamma, tau, hidden_size, replay_size, batch_size, hidden_size are taken from the original paper
 parser = argparse.ArgumentParser()
-parser.add_argument("--render_train", default=False, type=bool,
-                    help="Render the training steps (default: False)")
-parser.add_argument("--render_eval", default=False, type=bool,
-                    help="Render the evaluation steps (default: False)")
-parser.add_argument("--load_model", default=False, type=bool,
-                    help="Load a pretrained model (default: False)")
 parser.add_argument("--save_dir", default="./saved_models/",
                     help="Dir. path to save and load a model (default: ./saved_models/)")
 parser.add_argument("--timesteps", default=1e6, type=int,
@@ -53,8 +47,8 @@ parser.add_argument("--noise_stddev", default=0.01, type=int,
                     help="Standard deviation of the OU-Noise (default: 0.2)")
 parser.add_argument("--hidden_size", nargs=2, default=[400, 300], type=tuple,
                     help="Num. of units of the hidden layers (default: [400, 300]; OpenAI: [64, 64])")
-parser.add_argument("--n_test_cycles", default=10, type=int,
-                    help="Num. of episodes in the evaluation phases (default: 10; OpenAI: 20)")
+parser.add_argument("--wandb", action='store_true',
+                    help="Use wandb to log metrics")
 args = parser.parse_args()
 
 # if gpu is to be used
@@ -70,10 +64,8 @@ def update_wandb(reward, policy_loss, value_loss, iteration):
                })
 
 if __name__ == "__main__":
-    wandb.init(project="target-aquisition", 
-               config = {
-                   
-               })
+    if args.wandb:
+        wandb.init(project="target-aquisition")
 
     # Create the env
     env = DriveEnv()
@@ -103,10 +95,6 @@ if __name__ == "__main__":
 
     # Define counters and other variables
     start_step = 0
-    # timestep = start_step
-    if args.load_model:
-        # Load agent if necessary
-        start_step, memory = agent.load_checkpoint()
     rewards, policy_losses, value_losses, mean_test_rewards = [], [], [], []
     epoch = 0
     t = 0
@@ -156,7 +144,8 @@ if __name__ == "__main__":
             epoch_policy_loss += policy_loss
 
             print(f'Value loss: {value_loss} Policy loss: {policy_loss}')
-            update_wandb(epoch_return, policy_loss, value_loss, episodeNum)        
+            if args.wandb:
+                update_wandb(epoch_return, policy_loss, value_loss, episodeNum)        
 
 
         rewards.append(epoch_return)
@@ -172,8 +161,6 @@ if __name__ == "__main__":
                 state, action, reward, next_state, done = transition
                 epoch_return += reward
                 episodeReward += reward
-                # cv2.imshow(f"frame", state.numpy().reshape(NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH)[NUM_FRAMES_STACKED - 1])
-                # cv2.waitKey(1)
 
             print(f'Test episode reward: {episodeReward}')
 
