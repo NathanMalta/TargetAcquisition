@@ -41,7 +41,7 @@ moiWheelParallel = (1/4) * massWheel * (wheelDiameter/2)**2 #moment of inertia o
 moiTotal = moiDriveTrain + 2 * moiWheelParallel
 
 #reinforcement learning constants
-MAX_SIM_TIME = 6
+MAX_SIM_TIME = 5
 NUM_FRAMES_STACKED = 4
 
 #constants for DDPG exclusively

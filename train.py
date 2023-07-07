@@ -11,9 +11,10 @@ import numpy as np
 import torch
 import cv2
 import matplotlib.pyplot as plt
+import wandb
 
 from DDPG.ddpg import DDPG
-from DDPG.noise import OrnsteinUhlenbeckActionNoise
+from DDPG.noise import OrnsteinUhlenbeckActionNoise, NormalNoise
 from DDPG.replay_memory import ReplayMemory, Transition
 
 from Simulator.Constants import WIN_THRESHOLD, IMG_HEIGHT, IMG_WIDTH, NUM_FRAMES_STACKED
@@ -40,15 +41,15 @@ parser.add_argument("--save_dir", default="./saved_models/",
                     help="Dir. path to save and load a model (default: ./saved_models/)")
 parser.add_argument("--timesteps", default=1e6, type=int,
                     help="Num. of total timesteps of training (default: 1e6)")
-parser.add_argument("--batch_size", default=64, type=int,
+parser.add_argument("--batch_size", default=2048, type=int,
                     help="Batch size (default: 64; OpenAI: 128)")
 parser.add_argument("--replay_size", default=1e6, type=int,
                     help="Size of the replay buffer (default: 1e6; OpenAI: 1e5)")
 parser.add_argument("--gamma", default=0.99,
                     help="Discount factor (default: 0.99)")
-parser.add_argument("--tau", default=0.001,
+parser.add_argument("--tau", default=0.0005,
                     help="Update factor for the soft update of the target networks (default: 0.001)")
-parser.add_argument("--noise_stddev", default=0.2, type=int,
+parser.add_argument("--noise_stddev", default=0.01, type=int,
                     help="Standard deviation of the OU-Noise (default: 0.2)")
 parser.add_argument("--hidden_size", nargs=2, default=[400, 300], type=tuple,
                     help="Num. of units of the hidden layers (default: [400, 300]; OpenAI: [64, 64])")
@@ -60,7 +61,19 @@ args = parser.parse_args()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info("Using {}".format(device))
 
+def update_wandb(reward, policy_loss, value_loss, iteration):
+    # Update wandb
+    wandb.log({'reward': reward,
+               'policy_loss': policy_loss,
+               'value_loss': value_loss,
+               'episode_number': iteration,
+               })
+
 if __name__ == "__main__":
+    wandb.init(project="target-aquisition", 
+               config = {
+                   
+               })
 
     # Create the env
     env = DriveEnv()
@@ -88,6 +101,8 @@ if __name__ == "__main__":
     nb_actions = len(env.action_space)
     ou_noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(nb_actions),
                                             sigma=float(args.noise_stddev) * np.ones(nb_actions))
+    
+    normal_noise = NormalNoise()
 
     # Define counters and other variables
     start_step = 0
@@ -106,12 +121,10 @@ if __name__ == "__main__":
     episodeNum = 0
     voltFig, voltAx = plt.subplots()
     while episodeNum <= 4000:
-        ou_noise.reset()
         epoch_return = 0
-        
+        normal_noise.step()
     
-        # state = torch.Tensor([env.reset()]).to(device)
-        episodeMem = env.runEpisode(agent, ou_noise)
+        episodeMem = env.runEpisode(agent, normal_noise)
         episodeNum += 1
         episodeReward = 0
         for transition in episodeMem:
@@ -120,22 +133,14 @@ if __name__ == "__main__":
             episodeReward += reward
 
             #convert to tensor
-            state = torch.Tensor([state.numpy()]).to(device)
-            action = torch.Tensor([action.numpy()]).to(device)
-            reward = torch.Tensor([reward]).to(device)
-            next_state = torch.Tensor([next_state.numpy()]).to(device)
-            mask = torch.Tensor([done]).to(device)
+            state = torch.Tensor(np.array([state.numpy()])).to(device)
+            action = torch.Tensor(np.array([action.cpu().numpy()])).to(device)
+            reward = torch.Tensor(np.array([reward])).to(device)
+            next_state = torch.Tensor(np.array([next_state.numpy()])).to(device)
+            mask = torch.Tensor(np.array([done])).to(device)
 
-            cv2.imshow(f"frame", state.numpy().reshape(NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH)[NUM_FRAMES_STACKED - 1])
-            cv2.waitKey(1)
-            
             memory.push(state, action, mask, next_state, reward)
-        
-        voltAx.cla()
-        voltAx.plot(env.leftVoltageRecords, 'g', label='left_voltages')
-        voltAx.plot(env.rightVoltageRecords, 'r', label='right_voltages')
-        voltAx.legend()
-        plt.pause(0.001)
+
 
         print(f"episode {episodeNum} reward: {episodeReward}")
 
@@ -153,6 +158,9 @@ if __name__ == "__main__":
             epoch_value_loss += value_loss
             epoch_policy_loss += policy_loss
 
+            print(f'Value loss: {value_loss} Policy loss: {policy_loss}')
+            update_wandb(epoch_return, policy_loss, value_loss, episodeNum)        
+
 
         rewards.append(epoch_return)
         value_losses.append(epoch_value_loss)
@@ -167,22 +175,12 @@ if __name__ == "__main__":
                 state, action, reward, next_state, done = transition
                 epoch_return += reward
                 episodeReward += reward
-                cv2.imshow(f"frame", state.numpy().reshape(NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH)[NUM_FRAMES_STACKED - 1])
-                cv2.waitKey(1)
+                # cv2.imshow(f"frame", state.numpy().reshape(NUM_FRAMES_STACKED, IMG_HEIGHT, IMG_WIDTH)[NUM_FRAMES_STACKED - 1])
+                # cv2.waitKey(1)
 
             print(f'Test episode reward: {episodeReward}')
 
-
-            # Save if the mean of the last three averaged rewards while testing
-            # is greater than the specified reward threshold
-            # TODO: Option if no reward threshold is given
-    #         if np.mean(mean_test_rewards[-3:]) >= reward_threshold:
-    #             agent.save_checkpoint(timestep, memory)
-    #             time_last_checkpoint = time.time()
-    #             logger.info('Saved model at {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime())))
-
-    #     epoch += 1
-
-    # agent.save_checkpoint(timestep, memory)
-    # logger.info('Saved model at endtime {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime())))
-    # logger.info('Stopping training at {}'.format(time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.localtime())))
+        #save every 100 episodes
+        if episodeNum % 100 == 0:
+            agent.save_checkpoint(episodeNum, memory)
+            logger.info('Saved model at episode {}'.format(episodeNum))

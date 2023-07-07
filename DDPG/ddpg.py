@@ -12,7 +12,7 @@ from torch.optim import Adam
 from Simulator.Constants import NUM_FRAMES_STACKED, IMG_WIDTH, IMG_HEIGHT
 import numpy as np
 
-from .netsCnnTest2 import Actor, Critic
+from .nets import Actor, Critic
 
 logger = logging.getLogger('ddpg')
 logger.setLevel(logging.INFO)
@@ -190,7 +190,7 @@ class DDPG(object):
             'critic_target': self.critic_target.state_dict(),
             'actor_optimizer': self.actor_optimizer.state_dict(),
             'critic_optimizer': self.critic_optimizer.state_dict(),
-            'replay_buffer': replay_buffer,
+            # 'replay_buffer': replay_buffer,
         }
         logger.info('Saving model at timestep {}...'.format(last_timestep))
         torch.save(checkpoint, checkpoint_name)
@@ -231,11 +231,11 @@ class DDPG(object):
             self.critic_target.load_state_dict(checkpoint['critic_target'])
             self.actor_optimizer.load_state_dict(checkpoint['actor_optimizer'])
             self.critic_optimizer.load_state_dict(checkpoint['critic_optimizer'])
-            replay_buffer = checkpoint['replay_buffer']
+            # replay_buffer = checkpoint['replay_buffer']
 
             gc.collect()
             logger.info('Loaded model at timestep {} from {}'.format(start_timestep, checkpoint_path))
-            return start_timestep, replay_buffer
+            return start_timestep, None
         else:
             raise OSError('Checkpoint not found')
 

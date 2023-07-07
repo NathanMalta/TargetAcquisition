@@ -1,7 +1,6 @@
 import numpy as np
 from math import sqrt
 
-
 # from https://github.com/songrotek/DDPG/blob/master/ou_noise.py
 # and adapted to be synchronous with https://github.com/openai/baselines/blob/master/baselines/ddpg/noise.py
 class OUNoise:
@@ -45,7 +44,21 @@ class OrnsteinUhlenbeckActionNoise:
 
     def __repr__(self):
         return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(self.mu, self.sigma)
+    
 
+class NormalNoise:
+    def __init__(self, mu=0, sigma=0.5):
+        self.mu = mu
+        self.sigma = sigma
+
+    def noise(self):
+        # x = self.mu + self.sigma * np.random.normal(size=2)
+        x = np.random.uniform(-self.sigma, self.sigma, 2)
+        return x
+    
+    def step(self):
+        #decay sigma over time
+        self.sigma = self.sigma * 0.999
 
 # From OpenAI Baselines:
 # https://github.com/openai/baselines/blob/master/baselines/ddpg/noise.py

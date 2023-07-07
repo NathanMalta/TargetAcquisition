@@ -13,7 +13,7 @@ from Simulator.Constants import Kt, D, J, Kv, R, L #import motor constants
 from Simulator.Constants import MAX_SIM_TIME, NUM_FRAMES_STACKED #reinforcement learning constants
 from Simulator.CameraSim import CameraSim
 
-#using the differential drive kinematic model from https://www.semanticscholar.org/paper/Dynamic-Modelling-of-Differential-Drive-Mobile-and-Dhaouadi-Hatab/e919330857f80116050078a311953da07ec8876b?p2df
+#using the differential drive kinematic model described in https://www.semanticscholar.org/paper/Dynamic-Modelling-of-Differential-Drive-Mobile-and-Dhaouadi-Hatab/e919330857f80116050078a311953da07ec8876b?p2df
 
 class DriveEnv:
     def __init__(self, dt=0.05, startingPose=[0,0,0]): #startingPose: [xPos, yPos, heading]
@@ -28,9 +28,8 @@ class DriveEnv:
         self.reset()
 
 
-
     def reset(self):
-        startingPos = self.getRandomizedStartingPosition([-3, 3], [-3, 3], [-math.radians(-5), math.radians(5)])
+        startingPos = self.getRandomizedStartingPosition([-3, 3], [-3, 3], [math.radians(-10), math.radians(10)])
         self.startingState[3] = startingPos[0]
         self.startingState[4] = startingPos[1]
         self.startingState[2] = startingPos[2]
@@ -51,13 +50,11 @@ class DriveEnv:
     def getRandomizedStartingPosition(self, xRange, yRange, headingRange):
         x = random.uniform(*xRange)
         y = random.uniform(*yRange)
-        heading = math.tan((-y - self.targetPose[1]) / (x - self.targetPose[0])) + random.uniform(*headingRange)
 
+        #grab heading for the target
+        heading = math.atan2(self.targetPose[1] + y, self.targetPose[0] - x) + random.uniform(*headingRange)
         return [x, y, heading]
 
-
-
-        
     def getDerivatives(self, t, y, agent, ou_noise):
         linearVel = y[0]
         angularVel = y[1]
@@ -109,8 +106,8 @@ class DriveEnv:
         rightAngVel = (linearVel + halfWheelbase * angularVel) * (1/wheelRadius) / gearRatio
 
         #calculate currents
-        rightIDot = - (Kv / L) * rightAngVel - (R/L) * rightI + (1/L) * leftVoltage
-        leftIDot = - (Kv / L) * leftAngVel - (R/L) * leftI + (1/L) * rightVoltage
+        rightIDot = - (Kv / L) * rightAngVel - (R/L) * rightI + (1/L) * rightVoltage
+        leftIDot = - (Kv / L) * leftAngVel - (R/L) * leftI + (1/L) * leftVoltage
 
         #calculate torques produced by left and right motors
         #Note: assumes viscous drag (D) and counter torque due to MoI (J) are very small.  TODO: remove assumptions
@@ -130,9 +127,9 @@ class DriveEnv:
 
         #calculate changes in x and y position
         xDot = linearVel * math.cos(theta)
-        yDot = linearVel * math.sin(theta)
+        yDot = linearVel * math.sin(-theta)
 
-        return np.array([vDot, wDot, thetaDot, xDot, yDot, leftIDot, rightIDot])
+        return np.array([vDot, wDot, thetaDot, xDot, yDot, leftIDot.cpu().item(), rightIDot.cpu().item()])
 
     def runEpisode(self, agent, ou_noise):
         '''Runs the simulator for one episode using the given dqn
@@ -160,18 +157,15 @@ class DriveEnv:
                 #handle robot turns away from target - really bad
                 currentDist = math.hypot(curr[0][3] - self.targetPose[0], curr[0][4] - self.targetPose[1])
                 isDone = True
-                if currentDist > 2:
-                    reward = -1
+                reward = -2
 
                 memory.append([currFrameState, action, reward, nextFrameState, isDone])
                 break
             else:
-                memory.append([currFrameState, action, reward, nextFrameState, isDone]) 
+                memory.append([currFrameState, action, reward, nextFrameState, i == len(self.controllerRecords) - 2]) 
 
         return memory
 
-        
-    
     def getFrame(self, xPos, yPos, theta):
         '''Gets the view of the target at the robot's current position
         '''
@@ -179,14 +173,25 @@ class DriveEnv:
         return self.cameraSim.getFrame()
 
     def getReward(self, currentState, prevState):
+        robot_theta = currentState[2]
         currentPos = (currentState[3], currentState[4])
         prevPos = (prevState[3], prevState[4])
+        prevTheta = prevState[2]
+
+        #add reward for robot facing target
+        targetAngle = math.atan2(self.targetPose[1] + currentPos[1], self.targetPose[0] - currentPos[0])
+        angleDiff = abs(targetAngle - robot_theta)
+
+        prevAngle = math.atan2(self.targetPose[1] + prevPos[1], self.targetPose[0] - prevPos[0])
+        prevAngleDiff = abs(prevAngle - prevTheta)
+
+        reward = prevAngleDiff - angleDiff
 
         #add portion of reward from vehicle getting closer to target
         currentDist = math.hypot(currentPos[0] - self.targetPose[0], currentPos[1] - self.targetPose[1])
         prevDist = math.hypot(prevPos[0] - self.targetPose[0], prevPos[1] - self.targetPose[1])
         dist = prevDist - currentDist
-        reward = dist #math.copysign(dist**2, dist)
+        # reward += dist #math.copysign(dist**2, dist)
 
         if abs(reward) > 100:
             print("LARGE MAG REWEARD DETECTED!!")
@@ -200,8 +205,6 @@ class DriveEnv:
 
         return reward
         
-
-
 if __name__ == '__main__':
     #Let's see if this works...
 
@@ -209,8 +212,6 @@ if __name__ == '__main__':
 
     env = DriveEnv()
     results = env.runEpisode(None)
-
-   
 
     plt.plot(results.t, results.y[0, :], 'y', label='vel(t)')
     plt.plot(results.t, results.y[1, :], 'c', label='w(t)')
@@ -223,7 +224,6 @@ if __name__ == '__main__':
 
     # plt.plot(times, leftVel, 'r', label='leftVel')
     # plt.plot(times, rightVel, 'g', label='rightVel')
-    
 
     plt.legend(loc='best')
     plt.xlabel('time (sec)')

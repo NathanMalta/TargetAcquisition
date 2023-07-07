@@ -91,10 +91,9 @@ if __name__ == '__main__':
 	sim = CameraSim()
 	
 	initTime = time.time()
-	sim.setCamPos(0, 0, 0, 0)
-
-	frame = sim.getFrame()
-	cv2.imshow("test", np.uint8(frame))
-	cv2.waitKey(0)
-
-	
+	for heading in range(0, 100, 1):
+		sim.setCamPos(0, 0, heading/10, 0)
+		print(heading / 10)
+		frame = sim.getFrame()
+		cv2.imshow("test", np.uint8(frame))
+		cv2.waitKey(0)

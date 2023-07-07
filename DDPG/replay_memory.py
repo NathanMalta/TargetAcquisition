@@ -19,7 +19,16 @@ class ReplayMemory(object):
         """Saves a transition."""
         if len(self.memory) < self.capacity:
             self.memory.append(None)
-        self.memory[self.position] = Transition(*args)
+        
+        state, action, done, next_state, reward = args
+        #convert to cpu tensors to save vram
+        state = state.cpu()
+        action = action.cpu()
+        done = done.cpu()
+        next_state = next_state.cpu()
+        reward = reward.cpu()
+
+        self.memory[self.position] = Transition(state, action, done, next_state, reward)
         self.position = (self.position + 1) % self.capacity
 
     def sample(self, batch_size):
