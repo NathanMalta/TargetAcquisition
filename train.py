@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 import wandb
 
 from DDPG.ddpg import DDPG
-from DDPG.noise import OrnsteinUhlenbeckActionNoise, NormalNoise
+from DDPG.noise import UniformNoise
 from DDPG.replay_memory import ReplayMemory, Transition
 
 from Simulator.Constants import WIN_THRESHOLD, IMG_HEIGHT, IMG_WIDTH, NUM_FRAMES_STACKED
-from DDPG.DriveEnv import DriveEnv
+from Simulator.DriveEnv import DriveEnv
 
 # Create logger
 logger = logging.getLogger('train')
@@ -99,10 +99,7 @@ if __name__ == "__main__":
 
     # Initialize OU-Noise
     nb_actions = len(env.action_space)
-    ou_noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(nb_actions),
-                                            sigma=float(args.noise_stddev) * np.ones(nb_actions))
-    
-    normal_noise = NormalNoise()
+    normal_noise = UniformNoise()
 
     # Define counters and other variables
     start_step = 0

@@ -94,7 +94,7 @@ class DriveEnv:
             self.leftVoltageRecords.append(leftVoltage)
             self.rightVoltageRecords.append(rightVoltage)
         else:
-            #no controller update needed - just use values from last controller
+            #no controller update needed - just use values from last controller update
             leftVoltage = self.lastLeftVoltage
             rightVoltage = self.lastRightVoltage
 
@@ -116,10 +116,10 @@ class DriveEnv:
 
         #Drivetrain Calculations
 
-        #calculate derivative of linear velocity according to equation 47 of AUS source
+        #calculate derivative of linear velocity according to equation 47 of above paper
         vDot = (1 / (massTotal + (2 * moiWheelAxial) / (wheelRadius ** 2))) * (((1 / wheelRadius) * (rightTorque + leftTorque)) + (massTotal * wheelAxisToCg * angularVel ** 2))
 
-        #calculate derivative of angular velocity according to equation 47 of AUS source
+        #calculate derivative of angular velocity according to equation 47 of above paper
         wDot = (1 / (moiTotal + (2 * halfWheelbase ** 2) / (wheelRadius**2) * moiWheelAxial)) * ((halfWheelbase / wheelRadius * (rightTorque - leftTorque)) - (massDriveTrain * wheelAxisToCg * angularVel * linearVel))
 
         #calculate derivative of theta (same as angular vel)
@@ -131,13 +131,13 @@ class DriveEnv:
 
         return np.array([vDot, wDot, thetaDot, xDot, yDot, leftIDot.cpu().item(), rightIDot.cpu().item()])
 
-    def runEpisode(self, agent, ou_noise):
+    def runEpisode(self, agent, noise):
         '''Runs the simulator for one episode using the given dqn
         '''
         self.reset() #reset last voltages, last update time
         timeSpan = [0, MAX_SIM_TIME]
         evalTimes = np.arange(0, MAX_SIM_TIME, self.dt)
-        ivpOutput = integrate.solve_ivp(self.getDerivatives, timeSpan, self.startingState, method='RK45', args=(agent, ou_noise,), max_step=self.dt / 10, atol=1e-8, t_eval=evalTimes)
+        ivpOutput = integrate.solve_ivp(self.getDerivatives, timeSpan, self.startingState, method='RK45', args=(agent, noise,), max_step=self.dt / 10, atol=1e-8, t_eval=evalTimes)
 
         memory = [] 
 
