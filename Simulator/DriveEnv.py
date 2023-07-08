@@ -187,22 +187,6 @@ class DriveEnv:
 
         reward = prevAngleDiff - angleDiff
 
-        #add portion of reward from vehicle getting closer to target
-        currentDist = math.hypot(currentPos[0] - self.targetPose[0], currentPos[1] - self.targetPose[1])
-        prevDist = math.hypot(prevPos[0] - self.targetPose[0], prevPos[1] - self.targetPose[1])
-        dist = prevDist - currentDist
-        # reward += dist #math.copysign(dist**2, dist)
-
-        if abs(reward) > 100:
-            print("LARGE MAG REWEARD DETECTED!!")
-            print(f"reward: {reward}")
-            print(f"curentPos: {currentPos}, prevPos: {prevPos}")
-            print(f"currentDist: {currentDist}, prevDist: {prevDist}")
-            print(f"currentState: {currentState}, prevState: {prevState}")
-            import time
-            while(True):
-                time.sleep(1)
-
         return reward
         
 if __name__ == '__main__':
@@ -219,14 +203,7 @@ if __name__ == '__main__':
     plt.plot(results.t, results.y[5, :], 'r', label='left_i(t)')
     plt.plot(results.t, results.y[6, :], 'g', label='right_i(t)')
 
-    # leftVel = (results[:, 0] - halfWheelbase * results[:, 1]) * (1/(wheelDiameter/2))
-    # rightVel = (results[:, 0] + halfWheelbase * results[:, 1]) * (1/(wheelDiameter/2))
-
-    # plt.plot(times, leftVel, 'r', label='leftVel')
-    # plt.plot(times, rightVel, 'g', label='rightVel')
-
     plt.legend(loc='best')
     plt.xlabel('time (sec)')
-    # plt.ylabel('current (A)\nvelocity (rad/s)')
     plt.grid()
     plt.show()
