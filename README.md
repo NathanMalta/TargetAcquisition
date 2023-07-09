@@ -24,16 +24,22 @@ DDPG is a rather unstable algorithm.  This can result in the policy converging a
 ![reward graph](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/imgs/reward.png)
 
 Initially, the algorithm performs very poorly
-![epoch 100](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/epoch_visualizations/epoch_100.mp4)
+
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/c3e84b67-807e-4d81-8aaa-696cbbcfdc32
 
 Around epoch 1800, the first useful policy of moving forward and facing the target emerges.  Note that this corresponds to a spike in the reward graph as well:
-![epoch 1800](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/epoch_visualizations/epoch_1800.mp4)
+
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/0c3b9aa8-402d-4222-b909-74ae18cbd6a8
 
 At epoch 2000, this policy changes slightly, resulting in underdamped control of the system:
-![epoch 2000](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/epoch_visualizations/epoch_2000.mp4)
+
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/3f9bb71a-c888-450d-a72d-2c779a977aee
 
 Near epoch 2400, a new policy emerges, with the robot facing the target and driving backwards:
-![epoch 2400](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/epoch_visualizations/epoch_2400.mp4)
+
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/d26d7cda-a5cf-40fe-8e93-8d0eb354c885
 
 At epoch 3000, underdamped behavior of this backwards policy also emerges
-![epoch 3000](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/epoch_visualizations/epoch_2400.mp4)
+
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/34aecc7b-63f7-4737-84de-6f1d27d3174d
+
