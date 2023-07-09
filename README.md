@@ -1,7 +1,9 @@
 # Target Acquisition
 
 ## About the Project
-This is an application of the [Deep Deterministic Policy Gradient (DDPG)](https://arxiv.org/abs/1509.02971) reinforcement learning algorithm to learn voltage-level control of a two-wheeled Differential Drive mobile robot.  Normally, voltage-level control is handled by dedicated controllers running at kilohertz speeds.  Then, higher level path planners can command the vehicle using velocity or position setpoints.  In this project, I show a simple MLP with 2 hidden layers, running at 20 Hz, can learn control of a highly nonlinear vehicle.  This model operates on a series of 4 85x48 binary images (state space dimensionality: 16320) and outputs a continous value for each motor.  For this project, the model is tasked with facing a square target in the provided binary image.  The reward provided is the increase or decrease in robot heading, compared to the heading exactly focused on the target.
+This is an application of the [Deep Deterministic Policy Gradient (DDPG)](https://arxiv.org/abs/1509.02971) reinforcement learning algorithm to learn voltage-level control of a two-wheeled Differential Drive mobile robot.  Normally, voltage-level control is handled by dedicated controllers running at kilohertz speeds.  Then, higher level path planners can command the vehicle using velocity or position setpoints.
+
+In this project, I show a simple MLP with 2 hidden layers, running at 20 Hz, can learn control of a highly nonlinear vehicle.  This model operates on a series of 4 85x48 binary images (state space dimensionality: 16320) and outputs a continous value for each motor.  For this project, the model is tasked with facing a square target in the provided binary image.  The reward provided is the increase or decrease in robot heading, compared to the heading exactly focused on the target.
 
 ## Project Structure
 This repo 2 main sections:
