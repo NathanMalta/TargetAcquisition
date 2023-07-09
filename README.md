@@ -25,8 +25,10 @@ To run a pretrained model, first download the checkpoints from [here](https://dr
 
 DDPG is a rather unstable algorithm.  This can result in the policy converging and collapsing repeatedly as shown by the reward graph below.  Interestingly, because the task of facing a target is rather open-ended, the algorithm converges on a few different policies over the training period.
 
-![reward graph](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/imgs/reward.png)
-
+<p align="center">
+    <img src="https://github.com/NathanMalta/TargetAcquisition/assets/5125254/5628090a-495a-48a5-9267-f39f4832857e">
+</p>
+  
 Initially, the algorithm performs very poorly, as shown in the following video.  The vehicle turns quickly away from the target it should be pointed at, resulting in a high negative reward.  Note that the following videos are best viewed in full screen.
 
 https://github.com/NathanMalta/TargetAcquisition/assets/5125254/c3e84b67-807e-4d81-8aaa-696cbbcfdc32
