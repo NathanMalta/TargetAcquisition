@@ -3,7 +3,7 @@
 ## About the Project
 This is an application of the [Deep Deterministic Policy Gradient (DDPG)](https://arxiv.org/abs/1509.02971) reinforcement learning algorithm to learn voltage-level control of a two-wheeled Differential Drive mobile robot.  Normally, voltage-level control is handled by dedicated controllers running at kilohertz speeds.  Then, higher level path planners can command the vehicle using velocity or position setpoints.
 
-In this project, I show a simple MLP with 2 hidden layers, running at 20 Hz, can learn control of a highly nonlinear vehicle.  This model operates on a series of 4 85x48 binary images (state space dimensionality: 16320) and outputs a continous value for each motor.  For this project, the model is tasked with facing a square target in the provided binary image.  The reward provided is the increase or decrease in robot heading, compared to the heading exactly focused on the target.
+In this project, I show a simple MLP with 2 hidden layers, running at 20 Hz, can learn control of a highly nonlinear vehicle.  This model operates on a series of 4 85x48 binary images (state space dimensionality: 16320) and outputs a continuous value for each motor.  For this project, the model is tasked with facing a square target in the provided binary image.  The reward provided is the increase or decrease in robot heading, compared to the heading exactly focused on the target.
 
 ## Project Structure
 This repo 2 main sections:
@@ -25,11 +25,11 @@ DDPG is a rather unstable algorithm.  This can result in the policy converging a
 
 ![reward graph](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/imgs/reward.png)
 
-Initially, the algorithm performs very poorly
+Initially, the algorithm performs very poorly, as shown in the following video.  The vehicle turns quickly away from the target it should be pointed at, resulting in a high negative reward.
 
 https://github.com/NathanMalta/TargetAcquisition/assets/5125254/c3e84b67-807e-4d81-8aaa-696cbbcfdc32
 
-Around epoch 1800, the first useful policy of moving forward and facing the target emerges.  Note that this corresponds to a spike in the reward graph as well:
+Around epoch 1800, the first useful policy of moving forward and facing the target emerges.  Note that this corresponds to a spike in the above reward graph as well:
 
 https://github.com/NathanMalta/TargetAcquisition/assets/5125254/0c3b9aa8-402d-4222-b909-74ae18cbd6a8
 
