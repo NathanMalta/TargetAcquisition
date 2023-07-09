@@ -12,9 +12,11 @@ This repo 2 main sections:
 
 ## Using this repository
 First, install dependencies from the requirements.txt.  This can be done easily with pip:
+
 `pip install -r requirements.txt`
 
 For training the model from scratch, simply run the train.py file.  Results can optionally be logged to weights and biases with the --wandb flag.
+
 `python train.py`
 
 To run a pretrained model, first download the checkpoints from [here](https://drive.google.com/file/d/1LBug3RBT_DMytyRYjuC9JXjfZyQxGatr/view?usp=sharing) and extract into the project directory.  Then run all cells in the evaluate.ipynb notebook.  At the bottom, a video showing the model controlling a robot should appear.
