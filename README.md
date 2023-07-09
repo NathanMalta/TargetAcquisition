@@ -25,7 +25,7 @@ DDPG is a rather unstable algorithm.  This can result in the policy converging a
 
 ![reward graph](https://github.com/NathanMalta/TargetAcquisition/blob/master/media/imgs/reward.png)
 
-Initially, the algorithm performs very poorly, as shown in the following video.  The vehicle turns quickly away from the target it should be pointed at, resulting in a high negative reward.
+Initially, the algorithm performs very poorly, as shown in the following video.  The vehicle turns quickly away from the target it should be pointed at, resulting in a high negative reward.  Note that the following videos are best viewed in full screen.
 
 https://github.com/NathanMalta/TargetAcquisition/assets/5125254/c3e84b67-807e-4d81-8aaa-696cbbcfdc32
 
