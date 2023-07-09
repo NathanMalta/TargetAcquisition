@@ -26,26 +26,25 @@ To run a pretrained model, first download the checkpoints from [here](https://dr
 DDPG is a rather unstable algorithm.  This can result in the policy converging and collapsing repeatedly as shown by the reward graph below.  Interestingly, because the task of facing a target is rather open-ended, the algorithm converges on a few different policies over the training period.
 
 <p align="center">
-    <img src="https://github.com/NathanMalta/TargetAcquisition/assets/5125254/5628090a-495a-48a5-9267-f39f4832857e">
+    <img src="https://github.com/NathanMalta/TargetAcquisition/assets/5125254/9a15f72c-93f6-469d-9023-30ce7c50a04c">
 </p>
-  
+
 Initially, the algorithm performs very poorly, as shown in the following video.  The vehicle turns quickly away from the target it should be pointed at, resulting in a high negative reward.  Note that the following videos are best viewed in full screen.
 
-https://github.com/NathanMalta/TargetAcquisition/assets/5125254/c3e84b67-807e-4d81-8aaa-696cbbcfdc32
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/f410dff2-40f5-4fb4-9b0c-baf4440ec4eb
 
 Around epoch 1800, the first useful policy of moving forward and facing the target emerges.  Note that this corresponds to a spike in the above reward graph as well:
 
-https://github.com/NathanMalta/TargetAcquisition/assets/5125254/0c3b9aa8-402d-4222-b909-74ae18cbd6a8
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/cbc20174-8a45-4de2-8713-09661ef40cb4
 
 At epoch 2000, this policy changes slightly, resulting in underdamped control of the system:
 
-https://github.com/NathanMalta/TargetAcquisition/assets/5125254/3f9bb71a-c888-450d-a72d-2c779a977aee
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/719581e7-d1dc-47c8-9b3f-ad8df38fb866
 
 Near epoch 2400, a new policy emerges, with the robot facing the target and driving backwards:
 
-https://github.com/NathanMalta/TargetAcquisition/assets/5125254/d26d7cda-a5cf-40fe-8e93-8d0eb354c885
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/5f7bc1de-9b55-42ed-a89a-4d76e6e872a9
 
 At epoch 3000, underdamped behavior of this backwards policy also emerges
 
-https://github.com/NathanMalta/TargetAcquisition/assets/5125254/34aecc7b-63f7-4737-84de-6f1d27d3174d
-
+https://github.com/NathanMalta/TargetAcquisition/assets/5125254/45c70439-403f-453d-b975-5a72140b6275
